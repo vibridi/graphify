@@ -1,6 +1,7 @@
 package svg
 
 import (
+	"fmt"
 	"io"
 	"time"
 
@@ -41,17 +42,16 @@ func Draw(g graph.Layout, w io.Writer, opts Options) {
 	}
 
 	for _, e := range g.Edges {
-		// if splines {
-		// 	splineEdges(canvas, e, padding)
-		// } else {
-		// 	regularEdges(canvas, e, padding)
-		// }
-		regularEdges(canvas, e, opts)
+		if opts.DrawSplines {
+			drawCubicBezier(canvas, e, opts)
+		} else {
+			drawPolyline(canvas, e, opts)
+		}
 	}
 	canvas.End()
 }
 
-func regularEdges(canvas *svgo.SVG, e graph.Edge, opts Options) {
+func drawPolyline(canvas *svgo.SVG, e graph.Edge, opts Options) {
 	if len(e.Points) == 0 {
 		return
 	}
@@ -60,14 +60,32 @@ func regularEdges(canvas *svgo.SVG, e graph.Edge, opts Options) {
 		xs = append(xs, int(p[0])+opts.CanvasPadding)
 		ys = append(ys, int(p[1])+opts.CanvasPadding)
 	}
+	canvas.Polyline(xs, ys, lineStyle(lineParams(e, opts)))
+}
 
-	marker := "marker-end"
-	stroke := "black"
+func drawCubicBezier(canvas *svgo.SVG, e graph.Edge, opts Options) {
+	if len(e.Points) == 0 {
+		return
+	}
+	for i := 0; i < len(e.Points); i += 4 {
+		p1, p2, p3, p4 := e.Points[i], e.Points[i+1], e.Points[i+2], e.Points[i+3]
+		d := fmt.Sprintf("M%.2f,%.2f C%.2f,%.2f %.2f,%.2f %.2f,%.2f", p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], p4[0], p4[1])
+		canvas.Path(d, lineStyle(lineParams(e, opts)))
+	}
+}
+
+func lineParams(e graph.Edge, opts Options) (stroke, marker string) {
+	marker = "marker-end"
+	stroke = "black"
 	if e.ArrowHeadStart {
 		if opts.HighlightReversedEdges {
 			stroke = "red"
 		}
 		marker = "marker-start"
 	}
-	canvas.Polyline(xs, ys, "stroke-width:2;fill:none;stroke:"+stroke+";"+marker+":url(#arrowhead)")
+	return
+}
+
+func lineStyle(stroke, marker string) string {
+	return "stroke-width:2;fill:none;stroke:" + stroke + ";" + marker + ":url(#arrowhead)"
 }
