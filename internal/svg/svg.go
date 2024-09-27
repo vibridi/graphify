@@ -43,7 +43,11 @@ func Draw(g graph.Layout, w io.Writer, opts Options) {
 
 	for _, e := range g.Edges {
 		if opts.DrawSplines {
-			drawCubicBezier(canvas, e, opts)
+			if len(e.Points) == 2 {
+				drawPolyline(canvas, e, opts)
+			} else {
+				drawCubicBezier(canvas, e, opts)
+			}
 		} else {
 			drawPolyline(canvas, e, opts)
 		}
@@ -67,10 +71,25 @@ func drawCubicBezier(canvas *svgo.SVG, e graph.Edge, opts Options) {
 	if len(e.Points) == 0 {
 		return
 	}
+	fpad := float64(opts.CanvasPadding)
 	for i := 0; i < len(e.Points); i += 4 {
 		p1, p2, p3, p4 := e.Points[i], e.Points[i+1], e.Points[i+2], e.Points[i+3]
-		d := fmt.Sprintf("M%.2f,%.2f C%.2f,%.2f %.2f,%.2f %.2f,%.2f", p1[0], p1[1], p2[0], p2[1], p3[0], p3[1], p4[0], p4[1])
-		canvas.Path(d, lineStyle(lineParams(e, opts)))
+		d := fmt.Sprintf("M%.2f,%.2f C%.2f,%.2f %.2f,%.2f %.2f,%.2f",
+			p1[0]+fpad,
+			p1[1]+fpad,
+			p2[0]+fpad,
+			p2[1]+fpad,
+			p3[0]+fpad,
+			p3[1]+fpad,
+			p4[0]+fpad,
+			p4[1]+fpad,
+		)
+		arrowHead := (!e.ArrowHeadStart && i == len(e.Points)-4) || (e.ArrowHeadStart && i == 0)
+		if arrowHead {
+			canvas.Path(d, lineStyle(lineParams(e, opts)))
+		} else {
+			canvas.Path(d, lineStyle("black", ""))
+		}
 	}
 }
 
@@ -87,5 +106,9 @@ func lineParams(e graph.Edge, opts Options) (stroke, marker string) {
 }
 
 func lineStyle(stroke, marker string) string {
-	return "stroke-width:2;fill:none;stroke:" + stroke + ";" + marker + ":url(#arrowhead)"
+	style := "stroke-width:2;fill:none;stroke:" + stroke + ";"
+	if marker != "" {
+		return style + marker + ":url(#arrowhead)"
+	}
+	return style
 }
