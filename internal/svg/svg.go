@@ -32,7 +32,13 @@ func Draw(g graph.Layout, w io.Writer, opts Options) {
 	canvas.DefEnd()
 
 	for _, n := range g.Nodes {
-		canvas.Rect(int(n.X)+padding, int(n.Y)+padding, int(n.W), int(n.H), "fill:white;stroke:black")
+		x := int(n.X) + padding
+		y := int(n.Y) + padding
+		if n.W > 0 && n.H > 0 {
+			canvas.Rect(x, y, int(n.W), int(n.H), "fill:white;stroke:black")
+		} else {
+			canvas.Circle(x, y, 4, "fill:grey;stroke:red")
+		}
 
 		text := n.ID
 		if opts.PrintNodePosition {
@@ -42,15 +48,15 @@ func Draw(g graph.Layout, w io.Writer, opts Options) {
 	}
 
 	for _, e := range g.Edges {
-		if opts.DrawSplines {
-			if len(e.Points) == 2 {
-				drawPolyline(canvas, e, opts)
-			} else {
-				drawCubicBezier(canvas, e, opts)
-			}
+		if opts.DrawSplines && len(e.Points)%4 == 0 {
+			drawCubicBezier(canvas, e, opts)
 		} else {
 			drawPolyline(canvas, e, opts)
 		}
+	}
+
+	for _, el := range opts.Elements {
+		canvas.Writer.Write([]byte(el.SVG()))
 	}
 	canvas.End()
 }

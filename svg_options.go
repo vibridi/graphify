@@ -2,6 +2,8 @@ package graphify
 
 import "github.com/vibridi/graphify/internal/svg"
 
+type SvgStringer = svg.Stringer
+
 var defaultSvgOptions = svg.Options{
 	CanvasPadding:          60,
 	ShowTimestamp:          false,
@@ -46,5 +48,11 @@ func WithPrintNodePosition() SvgOption {
 func WithHighlightReversedEdges() SvgOption {
 	return func(o *svg.Options) {
 		o.HighlightReversedEdges = true
+	}
+}
+
+func WithSVGElements(elements []SvgStringer) SvgOption {
+	return func(o *svg.Options) {
+		o.Elements = elements
 	}
 }

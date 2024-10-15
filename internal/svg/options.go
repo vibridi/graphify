@@ -7,4 +7,5 @@ type Options struct {
 	DrawSplines            bool
 	PrintNodePosition      bool
 	HighlightReversedEdges bool
+	Elements               []Stringer
 }
