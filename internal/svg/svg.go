@@ -45,7 +45,7 @@ func Draw(g graph.Layout, w io.Writer, opts Options) {
 		if opts.PrintNodePosition {
 			// text += "-" + strconv.Itoa(n.LayerPos)
 		}
-		canvas.Text(int(n.X)+int(n.W)/2+padding, int(n.Y)+int(n.H)/2+padding, text, "text-anchor:middle;font-size:30px;fill:black")
+		canvas.Text(int(n.X)+int(n.W)/2+padding, int(n.Y)+int(n.H)/2+padding, text, "text-anchor:middle;fill:black")
 	}
 
 	for _, e := range g.Edges {
