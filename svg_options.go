@@ -10,6 +10,7 @@ var defaultSvgOptions = svg.Options{
 	DrawVirtualNodes:       true,
 	PrintNodePosition:      false,
 	HighlightReversedEdges: false,
+	FontSize:               25, // pixels
 }
 
 type SvgOption func(*svg.Options)
@@ -54,5 +55,11 @@ func WithHighlightReversedEdges() SvgOption {
 func WithSVGElements(elements []SvgStringer) SvgOption {
 	return func(o *svg.Options) {
 		o.Elements = elements
+	}
+}
+
+func WithFontSize(size int16) SvgOption {
+	return func(o *svg.Options) {
+		o.FontSize = size
 	}
 }

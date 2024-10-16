@@ -29,6 +29,7 @@ func Draw(g graph.Layout, w io.Writer, opts Options) {
 	canvas.Marker("arrowhead", 7, 2, 8, 8, `orient="auto-start-reverse"`)
 	canvas.Path("M0,0 V4 L8,2 Z", "fill:black")
 	canvas.MarkerEnd()
+	canvas.Style("text/css", fmt.Sprintf("text { font-family: monospace; font-size: %dpx; }", opts.FontSize))
 	canvas.DefEnd()
 
 	for _, n := range g.Nodes {
